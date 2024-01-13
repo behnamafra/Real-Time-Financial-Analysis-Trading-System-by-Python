@@ -16,6 +16,7 @@ async def send_data_to_websocket(data):
             await websocket.send(json.dumps(data))
         except websockets.exceptions.ConnectionClosed:
             # Handle the case where a connection is closed
+            # test comment
             pass
 
 async def start_trading_signal_consumer():
