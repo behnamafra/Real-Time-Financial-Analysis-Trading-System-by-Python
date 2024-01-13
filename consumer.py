@@ -1,6 +1,8 @@
 from confluent_kafka import Consumer, KafkaError
 import json
 import pandas as pd
+import pandas as pd
+import numpy as np
 
 # Kafka setup
 bootstrap_servers = 'localhost:9092'
@@ -30,6 +32,7 @@ window_size = 14  # You can adjust this based on your preference
 # Smoothing factor for Exponential Moving Average (EMA)
 alpha = 0.2
 
+
 def calculate_ema(data):
     """
     Calculate Exponential Moving Average (EMA) for a given pandas DataFrame.
@@ -45,6 +48,33 @@ def calculate_ema(data):
 
     # Calculate EMA
     data['ema'] = data['closing_price'].ewm(alpha=alpha, adjust=False).mean()
+
+    return data
+
+def generate_signals(data):
+    """
+    Generate buy/sell signals based on the calculated indicators.
+
+    Parameters:
+    - data: pandas DataFrame with 'timestamp', 'stock_symbol', 'closing_price', 'moving_average', 'ema', 'rsi' columns
+
+    Returns:
+    - pandas DataFrame with additional 'signal' column
+    """
+    # Define buy/sell thresholds (you can adjust these based on your strategy)
+    buy_threshold = 30
+    sell_threshold = 70
+
+    # Initialize the 'signal' column with 'Hold'
+    data['signal'] = 'Hold'
+
+    # Generate signals based on RSI
+    data.loc[data['rsi'] < buy_threshold, 'signal'] = 'Buy'
+    data.loc[data['rsi'] > sell_threshold, 'signal'] = 'Sell'
+
+    # Generate signals based on Moving Average and Exponential Moving Average (EMA)
+    data.loc[data['closing_price'] > data['moving_average'], 'signal'] = 'Buy'
+    data.loc[data['closing_price'] < data['ema'], 'signal'] = 'Sell'
 
     return data
 
@@ -81,14 +111,22 @@ def calculate_rsi(data):
     return data
 
 def process_data(message):
-    global moving_averages_df, ema_df, rsi_df  # Declare moving_averages_df as global
+    global closing_prices_df,moving_averages_df, ema_df, rsi_df  # Declare moving_averages_df as global
     # Implement your processing logic here
     data = json.loads(message.value())
     print(f"Received data: {data}")
 
     if 'closing_price' in data:
         # Update closing_prices_df with new closing prices
-        closing_prices_df.loc[len(closing_prices_df)] = [data['timestamp'], data['stock_symbol'], data['closing_price']]
+        new_row = {'timestamp': pd.to_datetime(data['timestamp']), 'stock_symbol': data['stock_symbol'], 'closing_price': data['closing_price']}
+        closing_prices_df = closing_prices_df._append(new_row, ignore_index=True)
+
+        # Ensure 'timestamp' column in closing_prices_df is datetime64[ns]
+        closing_prices_df['timestamp'] = pd.to_datetime(closing_prices_df['timestamp'])
+
+
+        # Convert 'timestamp' column to datetime64[ns] in moving_averages_df
+        moving_averages_df['timestamp'] = pd.to_datetime(moving_averages_df['timestamp'])
 
         # Calculate Moving Average
         closing_prices_df['timestamp'] = pd.to_datetime(closing_prices_df['timestamp'])
@@ -99,28 +137,63 @@ def process_data(message):
             # Check if Moving Average already exists for the stock and timestamp
             if not moving_averages_df[
                 (moving_averages_df['stock_symbol'] == symbol) & 
-                (moving_averages_df['timestamp'] == data['timestamp'])
+                (moving_averages_df['timestamp'] == pd.to_datetime(data['timestamp']))  # Convert to datetime
             ].empty:
                 continue  # Skip appending if duplicate Moving Average exists
 
             # Append Moving Average to the DataFrame
             moving_averages_df = moving_averages_df._append(
-                {'timestamp': data['timestamp'], 'stock_symbol': symbol, 'moving_average': moving_average},
+                {'timestamp': pd.to_datetime(data['timestamp']), 'stock_symbol': symbol, 'moving_average': moving_average},
                 ignore_index=True
             )
 
-            # Calculate Exponential Moving Average (EMA)
-            ema_df = calculate_ema(closing_prices_df)
+        # Calculate Exponential Moving Average (EMA)
+        closing_prices_df = calculate_ema(closing_prices_df)
 
-            # Check if enough data points are available for RSI calculation
-            if len(closing_prices_df) >= window_size:
-                # Calculate Relative Strength Index (RSI)
-                rsi_df = calculate_rsi(closing_prices_df)
+        # Convert 'timestamp' column in ema_df
+        ema_df['timestamp'] = pd.to_datetime(ema_df['timestamp'])
+
+        # Check if enough data points are available for RSI calculation
+        if len(closing_prices_df) >= window_size:
+            # Calculate Relative Strength Index (RSI)
+            rsi_df = calculate_rsi(closing_prices_df)
+
+        # Merge DataFrames with the same 'timestamp' and 'stock_symbol' columns
+            print("11111111111111111111111111")
+            combined_data = pd.merge(
+                closing_prices_df[['timestamp', 'stock_symbol', 'closing_price']],
+                moving_averages_df[['timestamp', 'stock_symbol', 'moving_average']],
+                on=['timestamp', 'stock_symbol'],
+                how='left'
+            )
+            print("222222222222222222222222222222")
+            # Merge with EMA and RSI DataFrames
+            combined_data = pd.merge(
+                combined_data,
+                ema_df[['timestamp', 'stock_symbol', 'ema']],
+                on=['timestamp', 'stock_symbol'],
+                how='left'
+            )
+            print("333333333333333333333333333333")
+            combined_data = pd.merge(
+                combined_data,
+                rsi_df[['timestamp', 'stock_symbol', 'rsi']],
+                on=['timestamp', 'stock_symbol'],
+                how='left'
+            )
+            print("44444444444444444444444444444444444")
+
+            # Generate buy/sell signals
+            combined_data = generate_signals(combined_data)
+
+            # Display the result
+            print(f"Buy/Sell Signals:\n{combined_data[['timestamp', 'stock_symbol', 'closing_price', 'signal']]}")
 
         # Display the result
         print(f"Moving Averages:\n{moving_averages_df}")
         print(f"Exponential Moving Averages:\n{ema_df[['timestamp', 'stock_symbol', 'ema']]}")
         print(f"Relative Strength Index (RSI):\n{rsi_df[['timestamp', 'stock_symbol', 'rsi']]}")
+        
 
         # Check if there are enough data points for RSI calculation
         if len(closing_prices_df) >= window_size:
