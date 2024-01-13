@@ -18,11 +18,70 @@ closing_prices_df = pd.DataFrame(columns=['timestamp', 'stock_symbol', 'closing_
 # Create an empty DataFrame to store the Moving Averages
 moving_averages_df = pd.DataFrame(columns=['timestamp', 'stock_symbol', 'moving_average'])
 
+# Create an empty DataFrame to store the Exponential Moving Averages
+ema_df = pd.DataFrame(columns=['timestamp', 'stock_symbol', 'ema'])
+
+# Create an empty DataFrame to store the Relative Strength Index (RSI)
+rsi_df = pd.DataFrame(columns=['timestamp', 'stock_symbol', 'rsi'])
+
 # Define the window size for the Moving Average
-window_size = 3  # You can adjust this based on your preference
+window_size = 14  # You can adjust this based on your preference
+
+# Smoothing factor for Exponential Moving Average (EMA)
+alpha = 0.2
+
+def calculate_ema(data):
+    """
+    Calculate Exponential Moving Average (EMA) for a given pandas DataFrame.
+
+    Parameters:
+    - data: pandas DataFrame with 'timestamp' and 'closing_price' columns
+
+    Returns:
+    - pandas DataFrame with additional 'ema' column
+    """
+    data['timestamp'] = pd.to_datetime(data['timestamp'])
+    data = data.sort_values(by='timestamp')  # Ensure data is sorted by timestamp
+
+    # Calculate EMA
+    data['ema'] = data['closing_price'].ewm(alpha=alpha, adjust=False).mean()
+
+    return data
+
+def calculate_rsi(data):
+    """
+    Calculate Relative Strength Index (RSI) for a given pandas DataFrame.
+
+    Parameters:
+    - data: pandas DataFrame with 'timestamp' and 'closing_price' columns
+
+    Returns:
+    - pandas DataFrame with additional 'rsi' column
+    """
+    data['timestamp'] = pd.to_datetime(data['timestamp'])
+    data = data.sort_values(by='timestamp')  # Ensure data is sorted by timestamp
+
+    # Calculate price changes
+    delta = data['closing_price'].diff()
+
+    # Calculate gains (positive changes) and losses (negative changes)
+    gains = delta.where(delta > 0, 0)
+    losses = -delta.where(delta < 0, 0)
+
+    # Calculate average gains and losses over the specified window
+    avg_gains = gains.rolling(window=window_size, min_periods=1).mean()
+    avg_losses = losses.rolling(window=window_size, min_periods=1).mean()
+
+    # Calculate Relative Strength (RS)
+    rs = avg_gains / avg_losses
+
+    # Calculate Relative Strength Index (RSI)
+    data['rsi'] = 100 - (100 / (1 + rs))
+
+    return data
 
 def process_data(message):
-    global moving_averages_df  # Declare moving_averages_df as global
+    global moving_averages_df, ema_df, rsi_df  # Declare moving_averages_df as global
     # Implement your processing logic here
     data = json.loads(message.value())
     print(f"Received data: {data}")
@@ -49,8 +108,23 @@ def process_data(message):
                 {'timestamp': data['timestamp'], 'stock_symbol': symbol, 'moving_average': moving_average},
                 ignore_index=True
             )
+
+            # Calculate Exponential Moving Average (EMA)
+            ema_df = calculate_ema(closing_prices_df)
+
+            # Check if enough data points are available for RSI calculation
+            if len(closing_prices_df) >= window_size:
+                # Calculate Relative Strength Index (RSI)
+                rsi_df = calculate_rsi(closing_prices_df)
+
         # Display the result
         print(f"Moving Averages:\n{moving_averages_df}")
+        print(f"Exponential Moving Averages:\n{ema_df[['timestamp', 'stock_symbol', 'ema']]}")
+        print(f"Relative Strength Index (RSI):\n{rsi_df[['timestamp', 'stock_symbol', 'rsi']]}")
+
+        # Check if there are enough data points for RSI calculation
+        if len(closing_prices_df) >= window_size:
+            print(f"Relative Strength Index (RSI):\n{rsi_df[['timestamp', 'stock_symbol', 'rsi']]}")
 
 
 if __name__ == "__main__":
