@@ -22,7 +22,7 @@ async def send_data_to_websocket(data):
 async def start_trading_signal_consumer():
     consumer_config = {
         'bootstrap.servers': 'localhost:9092',  # Replace with your Kafka bootstrap servers
-        'group.id': 'analyzed-data-group',       # Consumer group ID
+        'group.id': 'consumer_group',       # Consumer group ID
         'auto.offset.reset': 'earliest',         # Start reading from the beginning of the topic
     }
 
@@ -48,11 +48,12 @@ async def start_trading_signal_consumer():
                     break
 
             # Process the received message
-            stock_symbol = msg.value().decode('utf-8')  # Assuming data is sent as UTF-8 string
-            print(f"Received analyzed data for stock: {stock_symbol}")
+            #stock_symbol = msg.value().decode('utf-8')  # Assuming data is sent as UTF-8 string
+            data = json.loads(msg.value())
+            print(f"Received analyzed data for stock: {data}")
 
             # Send the data to all connected WebSocket clients
-            await send_data_to_websocket({'stock_symbol': stock_symbol})
+            await send_data_to_websocket(data)
 
     finally:
         # Close the Kafka consumer on exit

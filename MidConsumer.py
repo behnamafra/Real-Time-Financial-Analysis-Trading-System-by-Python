@@ -1,12 +1,15 @@
-from confluent_kafka import Consumer, KafkaError
+from confluent_kafka import Consumer, KafkaError, Producer
 import json
 import pandas as pd
 import pandas as pd
 import numpy as np
 
-# Kafka setup
+# Initialize combined_data as an empty DataFrame
+combined_data = pd.DataFrame(columns=['timestamp', 'stock_symbol', 'closing_price', 'signal'])
+
+# Kafka setup for receive data from producer
 bootstrap_servers = 'localhost:9092'
-topic = 'financial_data_topic'
+topicToRCV = 'financial_data_topic'
 
 # Consumer configuration
 consumer_config = {
@@ -14,6 +17,20 @@ consumer_config = {
     'group.id': 'consumer_group',
     'auto.offset.reset': 'earliest'
 }
+#-------------------------------------------
+# Kafka setup for sending data to the topic
+bootstrap_servers = 'localhost:9092'
+topicToSND = 'analyzed-data'
+
+# Producer configuration
+producer_config = {
+    'bootstrap.servers': bootstrap_servers,
+}
+
+# Create a Kafka producer instance
+producer = Producer(producer_config)
+
+
 # Create an empty DataFrame to store the closing prices
 closing_prices_df = pd.DataFrame(columns=['timestamp', 'stock_symbol', 'closing_price'])
 
@@ -111,7 +128,7 @@ def calculate_rsi(data):
     return data
 
 def process_data(message):
-    global closing_prices_df,moving_averages_df, ema_df, rsi_df  # Declare moving_averages_df as global
+    global closing_prices_df, moving_averages_df, ema_df, rsi_df, combined_data  # Declare moving_averages_df as global
     # Implement your processing logic here
     data = json.loads(message.value())
     print(f"Received data: {data}")
@@ -159,14 +176,14 @@ def process_data(message):
             rsi_df = calculate_rsi(closing_prices_df)
 
         # Merge DataFrames with the same 'timestamp' and 'stock_symbol' columns
-            print("11111111111111111111111111")
+            
             combined_data = pd.merge(
                 closing_prices_df[['timestamp', 'stock_symbol', 'closing_price']],
                 moving_averages_df[['timestamp', 'stock_symbol', 'moving_average']],
                 on=['timestamp', 'stock_symbol'],
                 how='left'
             )
-            print("222222222222222222222222222222")
+            
             # Merge with EMA and RSI DataFrames
             combined_data = pd.merge(
                 combined_data,
@@ -174,14 +191,14 @@ def process_data(message):
                 on=['timestamp', 'stock_symbol'],
                 how='left'
             )
-            print("333333333333333333333333333333")
+           
             combined_data = pd.merge(
                 combined_data,
                 rsi_df[['timestamp', 'stock_symbol', 'rsi']],
                 on=['timestamp', 'stock_symbol'],
                 how='left'
             )
-            print("44444444444444444444444444444444444")
+            
 
             # Generate buy/sell signals
             combined_data = generate_signals(combined_data)
@@ -199,11 +216,22 @@ def process_data(message):
         if len(closing_prices_df) >= window_size:
             print(f"Relative Strength Index (RSI):\n{rsi_df[['timestamp', 'stock_symbol', 'rsi']]}")
 
+        # Send data to Kafka Consumer
+        send_data_to_kafka(combined_data[['timestamp', 'stock_symbol', 'closing_price', 'signal']])
+
+def send_data_to_kafka(data):
+    # Convert DataFrame to JSON string
+    json_data = data.to_json(orient='records')
+
+    # Produce the message to the Kafka topic
+    producer.produce(topicToSND, key=None, value=json_data)
+    producer.flush()  # Ensure that all messages are sent
+
 
 if __name__ == "__main__":
     # Kafka consumer
     consumer = Consumer(consumer_config)
-    consumer.subscribe([topic])
+    consumer.subscribe([topicToRCV])
 
     # Process incoming data
     while True:
@@ -217,3 +245,4 @@ if __name__ == "__main__":
                 print(f'Error: {msg.error()}')
                 break
         process_data(msg)
+
