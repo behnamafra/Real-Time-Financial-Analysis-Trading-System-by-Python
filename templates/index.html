@@ -2,54 +2,194 @@
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hello App</title>
-</head>
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Stock Data App</title>
+      <!-- Link the CSS file -->
+      <link rel="stylesheet" href="style.css">
+  
+  </head>
 <body>
+   
+   <!-- Add a container for the digital watch -->
+   
+   <h1 class="title-text">Stock Market Manager
+    
+   </h1>
 
-  <h1>Hello App</h1>
+  
 
-  <!-- Input field to send messages to the server -->
-  <input type="text" id="messageInput" placeholder="Type a message">
-  <button onclick="sendMessage()">Send Message</button>
+   <div class="charts-container">
+      
+     
+   <div class="chart-container">
+      <div class="tab-content" id="tab1">
+         <!-- Content for Tab 1 -->
+         <p>
+             <!-- Canvas element to display the chart -->
+             <canvas  id="googlechart"></canvas>
+         </p>
+      </div>
+      
+      <div class="tab-content" id="tab2">
+         <!-- Content for Tab 2 -->
+         <p>
+             <!-- Canvas element to display the chart -->
+             <canvas id="applechart"></canvas>
+         </p>
+      </div>
+      
+      <div class="tab-content" id="tab3">
+         <!-- Content for Tab 3 -->
+         <p>
+             <!-- Canvas element to display the chart -->
+             <canvas id="amazonchart"></canvas>
+         </p>
+      </div>
+      
+      <div class="tab-content" id="tab4">
+         <!-- Content for Tab 4 -->
+         <p>
+             <!-- Canvas element to display the chart -->
+             <canvas id="teslachart"></canvas>
+         </p>
+      </div>
+      
+      <div class="tab-content" id="tab5">
+         <!-- Content for Tab 5 -->
+         <p>
+             <!-- Canvas element to display the chart -->
+             <canvas id="microsoftchart"></canvas>
+         </p>
+      </div>
+      
+   </div>
 
-   <!-- Display messages received from the server -->
-   <div id="output"></div>
+   <!-- sidebar -->
 
-  <script>
-    // Create a WebSocket connection
-    const socket = new WebSocket('ws://localhost:3000');
+   <div class="botton-box">
 
-    // Display messages received from the server
-    socket.addEventListener('message', (event) => {
-      const outputDiv = document.getElementById('output');
-      outputDiv.innerHTML += `<p>Server says: ${event.data}</p>`;
-    });
+      <div class="notif">
 
-    // Handle connection open
-    socket.addEventListener('open', (event) => {
-      console.log('WebSocket connection opened:', event);
-    });
+         <div class="digital-watch" id="digitalWatch" ></div>
 
-    // Handle connection close
-    socket.addEventListener('close', (event) => {
-      console.log('WebSocket connection closed:', event);
-    });
+         <div class="list">
+           <span>Amazon</span>
+           <span id="buy">buy</span>
+         </div>
 
-    // Function to send a message to the server
-    function sendMessage() {
-      const messageInput = document.getElementById('messageInput');
-      const message = messageInput.value;
+         <div class="list">
+            <span>Google</span>
+            <span id="sell">sell</span>
+          </div>
 
-      // Send the message to the server
-      socket.send(message);
+          <div class="list">
+            <span>Tesla</span>
+            <span id="buy">buy</span>
+          </div>
 
-      // Clear the input field
-      messageInput.value = '';
-    }
-  </script>
+          <div class="list">
+            <span>Tesla</span>
+            <span id="buy">buy</span>
+          </div>
+
+          <div class="list">
+            <span>Google</span>
+            <span id="sell">sell</span>
+          </div>
+
+      </div>
+
+      <!-- <div class="list" id="mg2">
+         <h3>stock list</h3>
+      </div> -->
+
+      <div class="stock-list">
+
+         <div class="list">
+            <img class="img" src="image/goog.png" alt="">
+            <button class="tab-btn" id="button-tab1" onclick="openTab('tab1', googlechart)">Google</button>
+         </div>
+
+      <div class="list">
+         <img class="img" src="image/tsla.png" alt="">
+         <button class="tab-btn" id="button-tab2" onclick="openTab('tab2', applechart)">Tesla</button>
+      </div>
+
+      <div class="list">
+         <img class="img" src="image/aws.png" alt="">
+         <button class="tab-btn" id="button-tab3" onclick="openTab('tab3', amazonchart)">Amazon</button>
+      </div>
+   
+      <div class="list">
+         <img class="img" src="image/msft.svg" alt="">
+         <button class="tab-btn" id="button-tab4" onclick="openTab('tab4', teslachart)">Microsoft</button>
+      </div>
+
+      <div class="list">
+         <img class="img" src="image/appl.png" alt="">
+         <button class="tab-btn" id="button-tab5" onclick="openTab('tab5', microsoftchart)">Apple</button>
+      </div>
+
+      <div class="list">
+         <img class="img" src="image/aws.png" alt="">
+         <button class="tab-btn" id="button-tab3" onclick="openTab('tab3', amazonchart)">Amazon</button>
+      </div>
+   
+      <div class="list">
+         <img class="img" src="image/msft.svg" alt="">
+         <button class="tab-btn" id="button-tab4" onclick="openTab('tab4', teslachart)">Microsoft</button>
+      </div>
+
+      <div class="list">
+         <img class="img" src="image/appl.png" alt="">
+         <button class="tab-btn" id="button-tab5" onclick="openTab('tab5', microsoftchart)">Apple</button>
+      </div>
+
+      <div class="list">
+         <img class="img" src="image/aws.png" alt="">
+         <button class="tab-btn" id="button-tab3" onclick="openTab('tab3', amazonchart)">Amazon</button>
+      </div>
+   
+      <div class="list">
+         <img class="img" src="image/msft.svg" alt="">
+         <button class="tab-btn" id="button-tab4" onclick="openTab('tab4', teslachart)">Microsoft</button>
+      </div>
+
+      <div class="list">
+         <img class="img" src="image/appl.png" alt="">
+         <button class="tab-btn" id="button-tab5" onclick="openTab('tab5', microsoftchart)">Apple</button>
+      </div>
+
+      <div class="list">
+         <img class="img" src="image/aws.png" alt="">
+         <button class="tab-btn" id="button-tab3" onclick="openTab('tab3', amazonchart)">Amazon</button>
+      </div>
+   
+      <div class="list">
+         <img class="img" src="image/msft.svg" alt="">
+         <button class="tab-btn" id="button-tab4" onclick="openTab('tab4', teslachart)">Microsoft</button>
+      </div>
+
+      <div class="list">
+         <img class="img" src="image/appl.png" alt="">
+         <button class="tab-btn" id="button-tab5" onclick="openTab('tab5', microsoftchart)">Apple</button>
+      </div>
+
+      </div>
+      </div>
+  </div>
+
+
+<!-- Script tags to include the chart library and its dependencies -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.5.1/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-moment/1.0.0/chartjs-adapter-moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-streaming/2.0.0/chartjs-plugin-streaming.min.js"></script>
+     
+<!-- Script tag to link the script.js file -->
+<script src="script.js"></script>
 
 </body>
 </html>

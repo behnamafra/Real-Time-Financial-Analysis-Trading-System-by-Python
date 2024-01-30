@@ -6,6 +6,7 @@ import numpy as np
 
 # Initialize combined_data as an empty DataFrame
 combined_data = pd.DataFrame(columns=['timestamp', 'stock_symbol', 'closing_price', 'signal'])
+last_processed_timestamp=None
 
 # Kafka setup for receive data from producer
 bootstrap_servers = 'localhost:9092'
@@ -128,7 +129,7 @@ def calculate_rsi(data):
     return data
 
 def process_data(message):
-    global closing_prices_df, moving_averages_df, ema_df, rsi_df, combined_data  # Declare moving_averages_df as global
+    global closing_prices_df, moving_averages_df, ema_df, rsi_df, combined_data, last_processed_timestamp # Declare moving_averages_df as global
     # Implement your processing logic here
     data = json.loads(message.value())
     print(f"Received data: {data}")
@@ -216,8 +217,19 @@ def process_data(message):
         if len(closing_prices_df) >= window_size:
             print(f"Relative Strength Index (RSI):\n{rsi_df[['timestamp', 'stock_symbol', 'rsi']]}")
 
-        # Send data to Kafka Consumer
-        send_data_to_kafka(combined_data[['timestamp', 'stock_symbol', 'closing_price', 'signal']])
+        
+
+        # Filter new data based on the last_processed_timestamp
+        if last_processed_timestamp is not None:
+            new_data = combined_data[combined_data['timestamp'] > pd.Timestamp(last_processed_timestamp)]
+        else:
+            new_data = combined_data
+
+        # Send only new data to Kafka Consumer
+        send_data_to_kafka(new_data[['timestamp', 'stock_symbol', 'closing_price', 'signal']])
+
+        # Update last_processed_timestamp
+        last_processed_timestamp = combined_data['timestamp'].max()
 
 def send_data_to_kafka(data):
     # Convert DataFrame to JSON string
@@ -245,4 +257,3 @@ if __name__ == "__main__":
                 print(f'Error: {msg.error()}')
                 break
         process_data(msg)
-

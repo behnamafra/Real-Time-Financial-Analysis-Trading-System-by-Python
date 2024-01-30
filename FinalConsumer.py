@@ -13,11 +13,16 @@ async def send_data_to_websocket(data):
     # Get all connected clients and send data to each one
     for websocket in connected_clients:
         try:
-            await websocket.send(json.dumps(data))
+            # Use custom_json_serializer to handle serialization
+            await websocket.send(json.dumps(data, default=custom_json_serializer))
         except websockets.exceptions.ConnectionClosed:
             # Handle the case where a connection is closed
-            # test comment
             pass
+def custom_json_serializer(obj):
+    if isinstance(obj, float):
+        # Preserve the original float value as a string
+        return f"{obj}"
+    return obj
 
 async def start_trading_signal_consumer():
     consumer_config = {
@@ -48,13 +53,17 @@ async def start_trading_signal_consumer():
                     break
 
             # Process the received message
-            #stock_symbol = msg.value().decode('utf-8')  # Assuming data is sent as UTF-8 string
-            data = json.loads(msg.value())
-            print(f"Received analyzed data for stock: {data}")
+            data_list = json.loads(msg.value())
+            print(f"adsdsdsdsd: {json.loads(msg.value())}")
+            #for data in data_list:
+            print(f"Received analyzed data for stock: {data_list}")
 
             # Send the data to all connected WebSocket clients
-            await send_data_to_websocket(data)
-
+            await send_data_to_websocket(data_list)
+            
+            
+            
+            
     finally:
         # Close the Kafka consumer on exit
         consumer.close()
