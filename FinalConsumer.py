@@ -54,7 +54,7 @@ async def start_trading_signal_consumer():
 
             # Process the received message
             data_list = json.loads(msg.value())
-            print(f"adsdsdsdsd: {json.loads(msg.value())}")
+            
             #for data in data_list:
             print(f"Received analyzed data for stock: {data_list}")
 

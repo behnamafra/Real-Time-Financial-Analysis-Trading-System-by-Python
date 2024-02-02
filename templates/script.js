@@ -1,28 +1,145 @@
-
 // script.js
 
- // Create a WebSocket connection
- const socket = new WebSocket('ws://localhost:3000');
-    const outputDiv = document.getElementById('output');
-    const receivedData = [];
+// Move the googleData array declaration outside the WebSocket event listeners
+const googleData = [];
+const receivedData = [];
+const amazonData = [];
+const microsoftData = [];
+const teslaData = [];
+const appleData = [];
 
-    socket.addEventListener('message', (event) => {
-      const message = event.data;
-      const parsedMessage = JSON.parse(event.data);
-      receivedData.push(parsedMessage);
 
-      const activeTabId = document.querySelector('.tab.selected').id;
-      const activeChart = getChartByTabId(activeTabId);
-      onRefresh(activeChart, receivedData);
-    });
+const amazonClosingPrice = [];
+const microsoftClosingPrice = [];
+const teslaClosingPrice = [];
+const appleClosingPrice = [];
+const googleClosingPrice = [];
 
-    socket.addEventListener('open', (event) => {
-      console.log('WebSocket connection opened:', receivedData);
-    });
+let googClosingPrice = [];
+let awsClosingPrice = [];
+let msftClosingPrice = [];
+let tslClosingPrice = [];
+let aplClosingPrice = [];
 
-    socket.addEventListener('close', (event) => {
-      console.log('WebSocket connection closed:', receivedData);
-    });
+// Create a WebSocket connection
+const socket = new WebSocket('ws://localhost:3000');
+
+
+
+socket.addEventListener('message', (event) => {
+  const parsedMessage = JSON.parse(event.data);
+// set time
+const today = new Date();
+let h = today.getHours();
+let m = today.getMinutes();
+let s = today.getSeconds();
+m = checkTime(m);
+s = checkTime(s);
+time =  h + ":" + m + ":" + s;
+
+function checkTime(i) {
+  if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+  return i;
+}
+
+
+  // Log parsedMessage to check its contents
+  console.log('Received time:', time);
+  // Check if parsedMessage[0] has the stock_symbol property
+  if (parsedMessage[0] && parsedMessage[0].hasOwnProperty('stock_symbol') && parsedMessage[0].hasOwnProperty('closing_price')) {
+    if (parsedMessage[0].stock_symbol == 'AMZN') {
+      amazonData.push(parsedMessage[0]);
+      amazonClosingPrice.push({
+        data: parsedMessage[0].closing_price,
+        time: time
+      });
+      const displaySpan = document.getElementById('lbl_amazon_signal');
+      const signalToDisplay = parsedMessage[0].signal;
+      const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
+      setTimeout(() => clearInterval(intervalId), 10000);
+      //updateAmazonChart();
+    }
+    if (parsedMessage[0].stock_symbol == 'MSFT') {
+      microsoftData.push(parsedMessage[0]);
+      microsoftClosingPrice.push({
+        data: parsedMessage[0].closing_price,
+        time: time
+      });
+      const displaySpan = document.getElementById('lbl_microsoft_signal');
+      const signalToDisplay = parsedMessage[0].signal;
+      const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
+      setTimeout(() => clearInterval(intervalId), 10000);
+      //updateMicrosoftChart();
+    }
+    if (parsedMessage[0].stock_symbol == 'GOOGL') {
+      googleData.push(parsedMessage[0]);
+      googleClosingPrice.push({
+        data: parsedMessage[0].closing_price,
+        time: time
+      });
+      localStorage.setItem('googleClosingPrice', JSON.stringify(googleClosingPrice));
+      const displaySpan = document.getElementById('lbl_google_signal');
+      const signalToDisplay = parsedMessage[0].signal;
+      const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
+      setTimeout(() => clearInterval(intervalId), 10000);
+      //updateGoogleChart();
+    }
+    if (parsedMessage[0].stock_symbol == 'TSLA') {
+      teslaData.push(parsedMessage[0]);
+      teslaClosingPrice.push({
+        data: parsedMessage[0].closing_price,
+        time: time
+      });
+      const displaySpan = document.getElementById('lbl_tesla_signal');
+      const signalToDisplay = parsedMessage[0].signal;
+      const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
+      setTimeout(() => clearInterval(intervalId), 10000);
+      //updateTeslaChart();
+    }
+    if (parsedMessage[0].stock_symbol == 'AAPL') {
+      appleData.push(parsedMessage[0]);
+      appleClosingPrice.push({
+        data: parsedMessage[0].closing_price,
+        time: time
+      });
+      const displaySpan = document.getElementById('lbl_apple_signal');
+      signalToDisplay = parsedMessage[0].signal;
+      const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
+      setTimeout(() => clearInterval(intervalId), 10000);
+      //updateAppleChart();
+    }
+  } else {
+    console.warn('parsedMessage[0] does not have the stock_symbol property:', parsedMessage[0]);
+  }
+  receivedData.push({
+    data: parsedMessage,
+    time: time
+  });
+  function updateDisplay(signal,lable) {
+    if (signal=='Buy')
+      lable.style.color = 'green';
+      lable.style.fontSize = '30px';
+      lable.textContent = `${signal}`;
+    if (signal=='Sell')
+      lable.style.color = 'red';
+      lable.style.fontSize = '30px';
+      lable.textContent = `${signal}`;
+    if (signal=='Hold')
+      lable.style.color = 'white';
+      lable.style.fontSize = '30px';
+      lable.textContent = `${signal}`;
+  }
+});
+ // Handle connection open
+ socket.addEventListener('open', (event) => {
+   console.log('WebSocket connection opened:', googleClosingPrice.length);
+   // Create the chart object after the WebSocket connection is opened
+ });
+
+ // Handle connection close
+ socket.addEventListener('close', (event) => {
+   console.log('WebSocket connection closed:', googleClosingPrice.length);
+ });
 
 document.getElementById('tab1').addEventListener('click', function () {
     openTab('tab1', googlechart);
@@ -44,97 +161,191 @@ document.getElementById('tab5').addEventListener('click', function () {
     openTab('tab5', microsoftchart);
 });
 
-// Define initial data for the chart
+let googleIndex = 0;
+let appleIndex = 0;
+let awsIndex = 0;
+let msftIndex = 0;
+let tslaIndex = 0;
+let index = 5;
+
+const show_google_chart = document.getElementById('googlechart').getContext('2d');
+const show_amazon_chart = document.getElementById('amazonchart').getContext('2d');
+const show_tesla_chart = document.getElementById('teslachart').getContext('2d');
+const show_apple_chart = document.getElementById('applechart').getContext('2d');
+const show_microsoft_chart = document.getElementById('microsoftchart').getContext('2d');
 
 
-// Initialize datasets with initial data
-var datasets = receivedData.map(data => ({
-  label: data.stock_symbol,
-  data: [{ x: data.timestamp, y: data.closing_price }],
-  borderColor: randomColor(),
-  backgroundColor: 'rgba(0, 0, 0, 0)',
-  fill: false
-}));
-  
-// Define the chart options
-// Define the chart options
-var options = {
-    type: 'line',
+//localStorage.setItem('googleClosingPrice', JSON.stringify(googleClosingPrice));
+
+
+
+
+
+const googChart = new Chart(show_google_chart, {
+    type: 'line', // You can change the chart type if needed
     data: {
-        datasets: []
-      },
-    options: {
-      maintainAspectRatio: false, // Allow the chart to adjust its size
-      responsive: true,           // Make the chart responsive
-      scales: {
-        x: {
-          type: 'realtime',
-          realtime: {
-            duration: 60000,
-            refresh: 1000,
-            delay: 2000,
-            onRefresh: onRefresh
-          }
-        },
-        y: {
-          title: {
-            display: true,
-            text: 'Price (USD)'
-          }
-        }
-      },
-      plugins: {
-        legend: {
-          display: true,
-          position: 'top'
-        },
-        tooltip: {
-          mode: 'nearest',
-          intersect: false
-        }
-      }
-    }
-  };
-
-// Create the chart object
-var googlechart = new Chart(document.getElementById('googlechart').getContext('2d'), options);
-var applechart = new Chart(document.getElementById('applechart').getContext('2d'), options);
-var amazonchart = new Chart(document.getElementById('amazonchart').getContext('2d'), options);
-var teslachart = new Chart(document.getElementById('teslachart').getContext('2d'), options);
-var microsoftchart = new Chart(document.getElementById('microsoftchart').getContext('2d'), options);
-
-// Define the function to fetch new data
-// Function to handle the received analyzed data
-function onRefresh(chart, receivedData) {
-  if (Array.isArray(receivedData)) {
-    var analyzedData = receivedData;
-
-    var filteredData = analyzedData.filter(data => chart.data.datasets.some(dataset => dataset.label === data.stock_symbol));
-
-    filteredData.forEach(data => {
-      var dataset = chart.data.datasets.find(dataset => dataset.label === data.stock_symbol);
-
-      if (!dataset) {
-        dataset = {
-          label: data.stock_symbol,
+        labels: [],
+        datasets: [{
+            label: 'Closing Price',
+            data: [],
+            borderColor: 'blue',
+            fill: false
+        }]
+    },
+    options: {} // Add any Chart.js options here
+});
+const aplChart = new Chart(show_apple_chart, {
+  type: 'line', // You can change the chart type if needed
+  data: {
+      labels: [],
+      datasets: [{
+          label: 'Closing Price',
           data: [],
-          borderColor: randomColor(),
-          backgroundColor: 'rgba(0, 0, 0, 0)',
+          borderColor: 'blue',
           fill: false
-        };
+      }]
+  },
+  options: {} // Add any Chart.js options here
+});
+const awsChart = new Chart(show_amazon_chart, {
+  type: 'line', // You can change the chart type if needed
+  data: {
+      labels: [],
+      datasets: [{
+          label: 'Closing Price',
+          data: [],
+          borderColor: 'blue',
+          fill: false
+      }]
+  },
+  options: {} // Add any Chart.js options here
+});
+const tslaChart = new Chart(show_tesla_chart, {
+  type: 'line', // You can change the chart type if needed
+  data: {
+      labels: [],
+      datasets: [{
+          label: 'Closing Price',
+          data: [],
+          borderColor: 'blue',
+          fill: false
+      }]
+  },
+  options: {} // Add any Chart.js options here
+});
+const msftChart = new Chart(show_microsoft_chart, {
+  type: 'line', // You can change the chart type if needed
+  data: {
+      labels: [],
+      datasets: [{
+          label: 'Closing Price',
+          data: [],
+          borderColor: 'blue',
+          fill: false
+      }]
+  },
+  options: {} // Add any Chart.js options here
+});
 
-        chart.data.datasets.push(dataset);
+googClosingPrice = JSON.parse(localStorage.getItem('googleClosingPrice')) || [];
+  for (let i = 0; i < googClosingPrice.length; i++) {
+    googChart.data.labels.push(googClosingPrice[i].time);
+    googChart.data.datasets[0].data.push(googClosingPrice[i].data);
+}
+googChart.update();
+function pushDataToGoogleChart(){
+  
+}
+
+
+function updateGoogleChart() {
+    if (googleIndex < googleClosingPrice.length) {
+      googChart.data.labels.push(googleClosingPrice[googleIndex].time);
+      googChart.data.datasets[0].data.push(googleClosingPrice[googleIndex].data);
+      googChart.update();
+        googleIndex++;
+        if (googleClosingPrice.length >= 50){
+          googChart.data.labels.splice(0, 1);
+          googChart.data.datasets[0].data.splice(0, 1);
+          googChart.update();
+        }
+    }
+}
+function updateAppleChart() {
+  if (appleIndex < appleClosingPrice.length) {
+    aplChart.data.labels.push(appleClosingPrice[appleIndex].time);
+    aplChart.data.datasets[0].data.push(appleClosingPrice[appleIndex].data);
+    aplChart.update();
+      appleIndex++;
+      if (appleClosingPrice.length >= 50){
+        aplChart.data.labels.splice(0, 1);
+        aplChart.data.datasets[0].data.splice(0, 1);
+        aplChart.update();
       }
-
-      dataset.data.push({
-        x: data.timestamp,
-        y: data.closing_price
-      });
-    });
-
-    chart.update();
   }
 }
+function updateTeslaChart() {
+  if (tslaIndex < teslaClosingPrice.length) {
+    tslaChart.data.labels.push(teslaClosingPrice[tslaIndex].time);
+    tslaChart.data.datasets[0].data.push(teslaClosingPrice[tslaIndex].data);
+    tslaChart.update();
+      tslaIndex++;
+      if (teslaClosingPrice.length >= 50){
+        tslaChart.data.labels.splice(0, 1);
+        tslaChart.data.datasets[0].data.splice(0, 1);
+        tslaChart.update();
+      }
+  }
+}
+function updateAmazonChart() {
+  if (awsIndex < amazonClosingPrice.length) {
+    awsChart.data.labels.push(amazonClosingPrice[awsIndex].time);
+    awsChart.data.datasets[0].data.push(amazonClosingPrice[awsIndex].data);
+    awsChart.update();
+      awsIndex++;
+      if (amazonClosingPrice.length >= 50){
+        awsChart.data.labels.splice(0, 1);
+        awsChart.data.datasets[0].data.splice(0, 1);
+        awsChart.update();
+      }
+  }
+}
+function updateMicrosoftChart() {
+  if (msftIndex < microsoftClosingPrice.length) {
+    msftChart.data.labels.push(microsoftClosingPrice[msftIndex].time);
+    msftChart.data.datasets[0].data.push(microsoftClosingPrice[msftIndex].data);
+    msftChart.update();
+      msftIndex++;
+      if (microsoftClosingPrice.length >= 50){
+        msftChart.data.labels.splice(0, 1);
+        msftChart.data.datasets[0].data.splice(0, 1);
+        msftChart.update();
+      }
+  }
+}
+setInterval(updateGoogleChart, 2000);
+setInterval(updateAppleChart, 2000);
+setInterval(updateTeslaChart, 2000);
+setInterval(updateAmazonChart, 2000); 
+setInterval(updateMicrosoftChart, 2000); // Update every 2 seconds
+
+document.getElementById('btn-showGoogle').addEventListener('click', () => {
+    //pushDataToGoogleChart()
+    updateGoogleChart(); // Start updating with Amazon data
+});
+document.getElementById('btn-showApple').addEventListener('click', () => {
+    updateAppleChart(); // Start updating with Google data
+});
+document.getElementById('btn-showTesla').addEventListener('click', () => {
+    updateTeslaChart(); // Start updating with Google data
+});
+document.getElementById('btn-showMicrosoft').addEventListener('click', () => {
+    updateAmazonChart(); // Start updating with Google data
+});
+document.getElementById('btn-showAmazon').addEventListener('click', () => {
+  updateMicrosoftChart(); // Start updating with Google data
+});
+
 
 // Function to switch tabs and update chart data
 function openTab(tabId, chart) {
@@ -156,7 +367,7 @@ function openTab(tabId, chart) {
         selectedTab.classList.add('selected');
 
         // Update the chart with new data when switching tabs
-        onRefresh(chart);
+        
 
          // Change the background color of the selected tab button
         const selectedButton = document.getElementById(`button-${tabId}`);
@@ -165,23 +376,6 @@ function openTab(tabId, chart) {
         }
              
     }
-}
-
-function getChartByTabId(tabId) {
-  switch (tabId) {
-    case 'tab1':
-      return googlechart;
-    case 'tab2':
-      return applechart;
-    case 'tab3':
-      return amazonchart;
-    case 'tab4':
-      return teslachart;
-    case 'tab5':
-      return microsoftchart;
-    default:
-      return null;
-  }
 }
   
 // Define a function to generate a random color

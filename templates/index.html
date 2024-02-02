@@ -24,7 +24,8 @@
       
      
    <div class="chart-container">
-      <div class="tab-content" id="tab1">
+      <div class="tab-content" id="tab1"> 
+         <h1 class="title-stock">Google</h1>
          <!-- Content for Tab 1 -->
          <p>
              <!-- Canvas element to display the chart -->
@@ -32,7 +33,8 @@
          </p>
       </div>
       
-      <div class="tab-content" id="tab2">
+      <div class="tab-content" id="tab2"> 
+         <h1 class="title-stock">Apple</h1>
          <!-- Content for Tab 2 -->
          <p>
              <!-- Canvas element to display the chart -->
@@ -41,6 +43,7 @@
       </div>
       
       <div class="tab-content" id="tab3">
+         <h1 class="title-stock">Amazon</h1>
          <!-- Content for Tab 3 -->
          <p>
              <!-- Canvas element to display the chart -->
@@ -49,6 +52,7 @@
       </div>
       
       <div class="tab-content" id="tab4">
+         <h1 class="title-stock">Tesla</h1>
          <!-- Content for Tab 4 -->
          <p>
              <!-- Canvas element to display the chart -->
@@ -57,6 +61,7 @@
       </div>
       
       <div class="tab-content" id="tab5">
+         <h1 class="title-stock">Microsoft</h1>
          <!-- Content for Tab 5 -->
          <p>
              <!-- Canvas element to display the chart -->
@@ -74,29 +79,31 @@
 
          <div class="digital-watch" id="digitalWatch" ></div>
 
-         <div class="list">
-           <span>Amazon</span>
-           <span id="buy">buy</span>
-         </div>
+         
 
          <div class="list">
             <span>Google</span>
-            <span id="sell">sell</span>
+            <span id="lbl_google_signal">-----</span>
+          </div>
+
+          <div class="list">
+            <span>Apple</span>
+            <span id="lbl_apple_signal">-----</span>
+          </div>
+
+          <div class="list">
+            <span>Amazon</span>
+            <span id="lbl_amazon_signal">-----</span>
           </div>
 
           <div class="list">
             <span>Tesla</span>
-            <span id="buy">buy</span>
+            <span id="lbl_tesla_signal">-----</span>
           </div>
-
+          
           <div class="list">
-            <span>Tesla</span>
-            <span id="buy">buy</span>
-          </div>
-
-          <div class="list">
-            <span>Google</span>
-            <span id="sell">sell</span>
+            <span>Microsoft</span>
+            <span id="lbl_microsoft_signal">-----</span>
           </div>
 
       </div>
@@ -109,75 +116,27 @@
 
          <div class="list">
             <img class="img" src="image/goog.png" alt="">
-            <button class="tab-btn" id="button-tab1" onclick="openTab('tab1', googlechart)">Google</button>
+            <button class="tab-btn" id="btn-showGoogle" onclick="openTab('tab1', googlechart)">Google</button>
          </div>
 
       <div class="list">
+         <img class="img" src="image/appl.png" alt="">
+         <button class="tab-btn" id="btn-showApple" onclick="openTab('tab2', applechart)">Apple</button>
+      </div>
+
+      <div class="list">
+         <img class="img" src="image/aws.png" alt="">
+         <button class="tab-btn" id="btn-showAmazon" onclick="openTab('tab3', amazonchart)">Amazon</button>
+      </div>
+   
+      <div class="list">
          <img class="img" src="image/tsla.png" alt="">
-         <button class="tab-btn" id="button-tab2" onclick="openTab('tab2', applechart)">Tesla</button>
+         <button class="tab-btn" id="btn-showTesla" onclick="openTab('tab4', teslachart)">Tesla</button>
       </div>
 
-      <div class="list">
-         <img class="img" src="image/aws.png" alt="">
-         <button class="tab-btn" id="button-tab3" onclick="openTab('tab3', amazonchart)">Amazon</button>
-      </div>
-   
       <div class="list">
          <img class="img" src="image/msft.svg" alt="">
-         <button class="tab-btn" id="button-tab4" onclick="openTab('tab4', teslachart)">Microsoft</button>
-      </div>
-
-      <div class="list">
-         <img class="img" src="image/appl.png" alt="">
-         <button class="tab-btn" id="button-tab5" onclick="openTab('tab5', microsoftchart)">Apple</button>
-      </div>
-
-      <div class="list">
-         <img class="img" src="image/aws.png" alt="">
-         <button class="tab-btn" id="button-tab3" onclick="openTab('tab3', amazonchart)">Amazon</button>
-      </div>
-   
-      <div class="list">
-         <img class="img" src="image/msft.svg" alt="">
-         <button class="tab-btn" id="button-tab4" onclick="openTab('tab4', teslachart)">Microsoft</button>
-      </div>
-
-      <div class="list">
-         <img class="img" src="image/appl.png" alt="">
-         <button class="tab-btn" id="button-tab5" onclick="openTab('tab5', microsoftchart)">Apple</button>
-      </div>
-
-      <div class="list">
-         <img class="img" src="image/aws.png" alt="">
-         <button class="tab-btn" id="button-tab3" onclick="openTab('tab3', amazonchart)">Amazon</button>
-      </div>
-   
-      <div class="list">
-         <img class="img" src="image/msft.svg" alt="">
-         <button class="tab-btn" id="button-tab4" onclick="openTab('tab4', teslachart)">Microsoft</button>
-      </div>
-
-      <div class="list">
-         <img class="img" src="image/appl.png" alt="">
-         <button class="tab-btn" id="button-tab5" onclick="openTab('tab5', microsoftchart)">Apple</button>
-      </div>
-
-      <div class="list">
-         <img class="img" src="image/aws.png" alt="">
-         <button class="tab-btn" id="button-tab3" onclick="openTab('tab3', amazonchart)">Amazon</button>
-      </div>
-   
-      <div class="list">
-         <img class="img" src="image/msft.svg" alt="">
-         <button class="tab-btn" id="button-tab4" onclick="openTab('tab4', teslachart)">Microsoft</button>
-      </div>
-
-      <div class="list">
-         <img class="img" src="image/appl.png" alt="">
-         <button class="tab-btn" id="button-tab5" onclick="openTab('tab5', microsoftchart)">Apple</button>
-      </div>
-
-      </div>
+         <button class="tab-btn" id="btn-showMicrosoft" onclick="openTab('tab5', microsoftchart)">Microsoft</button>
       </div>
   </div>
 
