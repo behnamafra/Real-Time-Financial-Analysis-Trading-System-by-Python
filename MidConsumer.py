@@ -47,28 +47,6 @@ rsi_df = pd.DataFrame(columns=['timestamp', 'stock_symbol', 'rsi'])
 # Define the window size for the Moving Average
 window_size = 14  # You can adjust this based on your preference
 
-# Smoothing factor for Exponential Moving Average (EMA)
-alpha = 0.2
-
-
-def calculate_ema(data):
-    """
-    Calculate Exponential Moving Average (EMA) for a given pandas DataFrame.
-
-    Parameters:
-    - data: pandas DataFrame with 'timestamp' and 'closing_price' columns
-
-    Returns:
-    - pandas DataFrame with additional 'ema' column
-    """
-    data['timestamp'] = pd.to_datetime(data['timestamp'])
-    data = data.sort_values(by='timestamp')  # Ensure data is sorted by timestamp
-
-    # Calculate EMA
-    data['ema'] = data['closing_price'].ewm(alpha=alpha, adjust=False).mean()
-
-    return data
-
 def generate_signals(data):
     """
     Generate buy/sell signals based on the calculated indicators.
@@ -127,9 +105,14 @@ def calculate_rsi(data):
     data['rsi'] = 100 - (100 / (1 + rs))
 
     return data
+last_processed_timestamp = None
+last_processed_timestamp_14 = None
+last_processed_timestamp_ma = None
+last_processed_timestamp_rsi = None
+last_processed_timestamp_ema = None
 
 def process_data(message):
-    global closing_prices_df, moving_averages_df, ema_df, rsi_df, combined_data, last_processed_timestamp # Declare moving_averages_df as global
+    global closing_prices_df, moving_averages_df, ema_df, rsi_df, combined_data, last_processed_timestamp,last_processed_timestamp_14,new_data_rsi,new_data_ema,new_data_14,new_data_ma,last_processed_timestamp_ma,last_processed_timestamp_rsi,last_processed_timestamp_ema # Declare moving_averages_df as global
     # Implement your processing logic here
     data = json.loads(message.value())
     print(f"Received data: {data}")
@@ -165,8 +148,17 @@ def process_data(message):
                 ignore_index=True
             )
 
-        # Calculate Exponential Moving Average (EMA)
-        closing_prices_df = calculate_ema(closing_prices_df)
+        # Calculate EMA and store in ema_df
+        alpha = 0.2  # Set the smoothing factor
+        ema_df = closing_prices_df[['timestamp', 'stock_symbol', 'closing_price']].copy()  # Create a copy with necessary columns
+        ema_df['ema'] = None  # Initialize EMA column
+
+        # Calculate EMA for the first row (use simple moving average)
+        ema_df.loc[0, 'ema'] = ema_df.loc[0, 'closing_price']
+
+        # Calculate EMA for subsequent rows
+        for i in range(1, len(ema_df)):
+            ema_df.loc[i, 'ema'] = (alpha * ema_df.loc[i, 'closing_price']) + ((1 - alpha) * ema_df.loc[i - 1, 'ema'])
 
         # Convert 'timestamp' column in ema_df
         ema_df['timestamp'] = pd.to_datetime(ema_df['timestamp'])
@@ -218,19 +210,51 @@ def process_data(message):
             print(f"Relative Strength Index (RSI):\n{rsi_df[['timestamp', 'stock_symbol', 'rsi']]}")
 
         
+        
 
         # Filter new data based on the last_processed_timestamp
         if last_processed_timestamp is not None:
             new_data = combined_data[combined_data['timestamp'] > pd.Timestamp(last_processed_timestamp)]
+            new_data_14 =closing_prices_df[closing_prices_df['timestamp'] > pd.Timestamp(last_processed_timestamp_14)]
         else:
             new_data = combined_data
+            new_data_14 = closing_prices_df
 
-        # Send only new data to Kafka Consumer
-        send_data_to_kafka(new_data[['timestamp', 'stock_symbol', 'closing_price', 'signal']])
+        if last_processed_timestamp_ema is not None:
+            new_data_ema = ema_df[ema_df['timestamp'] > pd.Timestamp(last_processed_timestamp_ema)]
+        else:
+            new_data_ema = ema_df
+        
+        if last_processed_timestamp_ma is not None:
+            new_data_ma = moving_averages_df[moving_averages_df['timestamp'] > pd.Timestamp(last_processed_timestamp_ma)]
+        else:
+            new_data_ma = moving_averages_df
+        
+        if last_processed_timestamp_rsi is not None:
+            new_data_rsi = rsi_df[rsi_df['timestamp'] > pd.Timestamp(last_processed_timestamp_rsi)]
+        else:
+            new_data_rsi = rsi_df
+
+        if len(closing_prices_df) <= window_size:
+            send_data_to_kafka(new_data_14[['timestamp', 'stock_symbol', 'closing_price']])
+            send_data_to_kafka(new_data_ema[['timestamp', 'stock_symbol', 'ema']])
+            send_data_to_kafka(new_data_ma[['timestamp', 'stock_symbol', 'moving_average']])
+        else:
+            # Send only new data to Kafka Consumer
+            send_data_to_kafka(new_data[['timestamp', 'stock_symbol', 'closing_price', 'signal']])
+            send_data_to_kafka(new_data_ema[['timestamp', 'stock_symbol', 'ema']])
+            send_data_to_kafka(new_data_ma[['timestamp', 'stock_symbol', 'moving_average']])
+            send_data_to_kafka(new_data_rsi[['timestamp', 'stock_symbol', 'rsi']])
+            
+            
 
         # Update last_processed_timestamp
         last_processed_timestamp = combined_data['timestamp'].max()
-
+        last_processed_timestamp_14 = closing_prices_df['timestamp'].max()
+        last_processed_timestamp_ma = moving_averages_df['timestamp'].max()
+        last_processed_timestamp_rsi = rsi_df['timestamp'].max()
+        last_processed_timestamp_ema = ema_df['timestamp'].max()
+        
 def send_data_to_kafka(data):
     # Convert DataFrame to JSON string
     json_data = data.to_json(orient='records')

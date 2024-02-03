@@ -14,10 +14,52 @@
    
    <!-- Add a container for the digital watch -->
    
-   <h1 class="title-text">Stock Market Manager
-    
-   </h1>
-
+   <h1 class="title-text">Stock Market Manager</h1>
+   <div class="table">
+      <table>
+         <thead>
+             <tr>
+                 <th>Stock Symbol</th>
+                 <th>Moving Average(MA)</th>
+                 <th>Exponential Moving Average(EMA)</th>
+                 <th>Relative Strength Index(RSI)</th>
+                 <th>Closing Price</th> </tr>
+         </thead>
+         <tbody>
+             <tr>
+                 <td>Google</td>
+                 <td id="ma-google">-----</td>
+                 <td id="ema-google">-----</td>
+                 <td id="rsi-google">-----</td>
+                 <td id="close-price-google">-----</td> </tr>
+             <tr>
+                 <td>Apple</td>
+                 <td id="ma-apple">-----</td>
+                 <td id="ema-apple">-----</td>
+                 <td id="rsi-apple">-----</td>
+                 <td id="close-price-apple">-----</td> </tr>
+             <tr>
+                 <td>Amazon</td> 
+                 <td id="ma-amazone">-----</td> 
+                 <td id="ema-amazone">-----</td> 
+                 <td id="rsi-amazone">-----</td> 
+                 <td id="close-price-amazone">-----</td> </tr>
+             <tr>
+                 <td>Tesla</td> 
+                 <td id="ma-tesla">-----</td> 
+                 <td id="ema-tesla">-----</td> 
+                 <td id="rsi-tesla">-----</td> 
+                 <td id="close-price-tesla">-----</td> 
+               </tr>
+             <tr>
+                 <td>Microsoft</td> 
+                 <td id="ma-microsoft">-----</td> 
+                 <td id="ema-microsoft">-----</td> 
+                 <td id="rsi-microsoft">-----</td> 
+                 <td id="close-price-microsoft">-----</td> </tr>
+         </tbody>
+     </table>
+   </div>
   
 
    <div class="charts-container">
@@ -71,6 +113,7 @@
       
    </div>
 
+   
    <!-- sidebar -->
 
    <div class="botton-box">
@@ -138,7 +181,9 @@
          <img class="img" src="image/msft.svg" alt="">
          <button class="tab-btn" id="btn-showMicrosoft" onclick="openTab('tab5', microsoftchart)">Microsoft</button>
       </div>
+      
   </div>
+  
 
 
 <!-- Script tags to include the chart library and its dependencies -->

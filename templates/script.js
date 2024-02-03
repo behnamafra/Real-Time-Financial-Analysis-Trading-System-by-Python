@@ -46,6 +46,31 @@ function checkTime(i) {
   // Log parsedMessage to check its contents
   console.log('Received time:', time);
   // Check if parsedMessage[0] has the stock_symbol property
+  if (parsedMessage[0] && parsedMessage[0].hasOwnProperty('stock_symbol') && parsedMessage[0].hasOwnProperty('moving_average')) {
+      const ma_apple = document.getElementById('ma-apple');
+      const ma_apple_To_display = parsedMessage[1].moving_average;
+      const interval_apple_ma_Id = setInterval(updateDisplay(ma_apple_To_display,ma_apple), 1000);
+      setTimeout(() => clearInterval(interval_apple_ma_Id), 10000);
+      const ma_microsoft = document.getElementById('ma-microsoft');
+      const ma_microsoft_To_display = parsedMessage[4].moving_average;
+      const interval_microsoft_ma_Id = setInterval(updateDisplay(ma_microsoft_To_display,ma_microsoft), 1000);
+      setTimeout(() => clearInterval(interval_microsoft_ma_Id), 10000);
+      const ma_google = document.getElementById('ma-google');
+      const ma_google_To_display = parsedMessage[2].moving_average;
+      const interval_google_ma_Id = setInterval(updateDisplay(ma_google_To_display,ma_google), 1000);
+      setTimeout(() => clearInterval(interval_google_ma_Id), 10000);
+      const ma_amazon = document.getElementById('ma-amazone');
+      const ma_amazon_To_display = parsedMessage[3].moving_average;
+      const interval_amazon_ma_Id = setInterval(updateDisplay(ma_amazon_To_display,ma_amazon), 1000);
+      setTimeout(() => clearInterval(interval_amazon_ma_Id), 10000);
+      const ma_tesla = document.getElementById('ma-tesla');
+      const ma_tesla_To_display = parsedMessage[0].moving_average;
+      const interval_tesla_ma_Id = setInterval(updateDisplay(ma_tesla_To_display,ma_tesla), 1000);
+      setTimeout(() => clearInterval(interval_tesla_ma_Id), 10000);
+
+
+  
+}
   if (parsedMessage[0] && parsedMessage[0].hasOwnProperty('stock_symbol') && parsedMessage[0].hasOwnProperty('closing_price')) {
     if (parsedMessage[0].stock_symbol == 'AMZN') {
       amazonData.push(parsedMessage[0]);
@@ -57,6 +82,10 @@ function checkTime(i) {
       const signalToDisplay = parsedMessage[0].signal;
       const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
       setTimeout(() => clearInterval(intervalId), 10000);
+      const closing_price = document.getElementById('close-price-amazone');
+      const closingPriceToDisplay = parsedMessage[0].closing_price;
+      const interval_closingPrice_Id = setInterval(updateDisplay(closingPriceToDisplay,closing_price), 1000);
+      setTimeout(() => clearInterval(interval_closingPrice_Id), 10000);
       //updateAmazonChart();
     }
     if (parsedMessage[0].stock_symbol == 'MSFT') {
@@ -69,6 +98,10 @@ function checkTime(i) {
       const signalToDisplay = parsedMessage[0].signal;
       const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
       setTimeout(() => clearInterval(intervalId), 10000);
+      const closing_price = document.getElementById('close-price-microsoft');
+      const closingPriceToDisplay = parsedMessage[0].closing_price;
+      const interval_closingPrice_Id = setInterval(updateDisplay(closingPriceToDisplay,closing_price), 1000);
+      setTimeout(() => clearInterval(interval_closingPrice_Id), 10000);
       //updateMicrosoftChart();
     }
     if (parsedMessage[0].stock_symbol == 'GOOGL') {
@@ -82,6 +115,10 @@ function checkTime(i) {
       const signalToDisplay = parsedMessage[0].signal;
       const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
       setTimeout(() => clearInterval(intervalId), 10000);
+      const closing_price = document.getElementById('close-price-google');
+      const closingPriceToDisplay = parsedMessage[0].closing_price;
+      const interval_closingPrice_Id = setInterval(updateDisplay(closingPriceToDisplay,closing_price), 1000);
+      setTimeout(() => clearInterval(interval_closingPrice_Id), 10000);
       //updateGoogleChart();
     }
     if (parsedMessage[0].stock_symbol == 'TSLA') {
@@ -94,6 +131,10 @@ function checkTime(i) {
       const signalToDisplay = parsedMessage[0].signal;
       const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
       setTimeout(() => clearInterval(intervalId), 10000);
+      const closing_price = document.getElementById('close-price-tesla');
+      const closingPriceToDisplay = parsedMessage[0].closing_price;
+      const interval_closingPrice_Id = setInterval(updateDisplay(closingPriceToDisplay,closing_price), 1000);
+      setTimeout(() => clearInterval(interval_closingPrice_Id), 10000);
       //updateTeslaChart();
     }
     if (parsedMessage[0].stock_symbol == 'AAPL') {
@@ -106,9 +147,88 @@ function checkTime(i) {
       signalToDisplay = parsedMessage[0].signal;
       const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
       setTimeout(() => clearInterval(intervalId), 10000);
+      const closing_price = document.getElementById('close-price-apple');
+      const closingPriceToDisplay = parsedMessage[0].closing_price;
+      const interval_closingPrice_Id = setInterval(updateDisplay(closingPriceToDisplay,closing_price), 1000);
+      setTimeout(() => clearInterval(interval_closingPrice_Id), 10000);
       //updateAppleChart();
     }
-  } else {
+  
+  }if (parsedMessage[0] && parsedMessage[0].hasOwnProperty('stock_symbol') && parsedMessage[0].hasOwnProperty('ema')){
+    if (parsedMessage[0].stock_symbol == 'AMZN') {
+      const moving_average = document.getElementById('ema-amazone');
+      const ma_ToDisplay = parsedMessage[0].ema;
+      const interval_ma_Id = setInterval(updateDisplay(ma_ToDisplay,moving_average), 1000);
+      setTimeout(() => clearInterval(interval_ma_Id), 10000);
+      //updateAmazonChart();
+    }
+    if (parsedMessage[0].stock_symbol == 'MSFT') {
+      const displaySpan = document.getElementById('ema-microsoft');
+      const signalToDisplay = parsedMessage[0].ema;
+      const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
+      setTimeout(() => clearInterval(intervalId), 10000);
+      //updateAmazonChart();
+    }
+    if (parsedMessage[0].stock_symbol == 'GOOGL') {
+      const displaySpan = document.getElementById('ema-google');
+      const signalToDisplay = parsedMessage[0].ema;
+      const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
+      setTimeout(() => clearInterval(intervalId), 10000);
+      //updateAmazonChart();
+    }
+    if (parsedMessage[0].stock_symbol == 'TSLA') {
+      const displaySpan = document.getElementById('ema-tesla');
+      const signalToDisplay = parsedMessage[0].ema;
+      const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
+      setTimeout(() => clearInterval(intervalId), 10000);
+      //updateAmazonChart();
+    }
+    if (parsedMessage[0].stock_symbol == 'AAPL') {
+      const displaySpan = document.getElementById('ema-apple');
+      const signalToDisplay = parsedMessage[0].ema;
+      const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
+      setTimeout(() => clearInterval(intervalId), 10000);
+      //updateAmazonChart();
+    }
+
+  }if (parsedMessage[0] && parsedMessage[0].hasOwnProperty('stock_symbol') && parsedMessage[0].hasOwnProperty('rsi')){
+    if (parsedMessage[0].stock_symbol == 'AMZN') {
+      const moving_average = document.getElementById('rsi-amazone');
+      const ma_ToDisplay = parsedMessage[0].rsi;
+      const interval_ma_Id = setInterval(updateDisplay(ma_ToDisplay,moving_average), 1000);
+      setTimeout(() => clearInterval(interval_ma_Id), 10000);
+      //updateAmazonChart();
+    }
+    if (parsedMessage[0].stock_symbol == 'MSFT') {
+      const displaySpan = document.getElementById('rsi-microsoft');
+      const signalToDisplay = parsedMessage[0].rsi;
+      const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
+      setTimeout(() => clearInterval(intervalId), 10000);
+      //updateAmazonChart();
+    }
+    if (parsedMessage[0].stock_symbol == 'GOOGL') {
+      const displaySpan = document.getElementById('rsi-google');
+      const signalToDisplay = parsedMessage[0].rsi;
+      const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
+      setTimeout(() => clearInterval(intervalId), 10000);
+      //updateAmazonChart();
+    }
+    if (parsedMessage[0].stock_symbol == 'TSLA') {
+      const displaySpan = document.getElementById('rsi-tesla');
+      const signalToDisplay = parsedMessage[0].rsi;
+      const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
+      setTimeout(() => clearInterval(intervalId), 10000);
+      //updateAmazonChart();
+    }
+    if (parsedMessage[0].stock_symbol == 'AAPL') {
+      const displaySpan = document.getElementById('rsi-apple');
+      const signalToDisplay = parsedMessage[0].rsi;
+      const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
+      setTimeout(() => clearInterval(intervalId), 10000);
+      //updateAmazonChart();
+    }
+  } 
+  else {
     console.warn('parsedMessage[0] does not have the stock_symbol property:', parsedMessage[0]);
   }
   receivedData.push({
