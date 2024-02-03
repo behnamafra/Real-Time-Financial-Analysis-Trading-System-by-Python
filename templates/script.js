@@ -78,6 +78,7 @@ function checkTime(i) {
         data: parsedMessage[0].closing_price,
         time: time
       });
+      localStorage.setItem('amazonClosingPrice', JSON.stringify(amazonClosingPrice));
       const displaySpan = document.getElementById('lbl_amazon_signal');
       const signalToDisplay = parsedMessage[0].signal;
       const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
@@ -94,6 +95,7 @@ function checkTime(i) {
         data: parsedMessage[0].closing_price,
         time: time
       });
+      localStorage.setItem('microsoftClosingPrice', JSON.stringify(microsoftClosingPrice));
       const displaySpan = document.getElementById('lbl_microsoft_signal');
       const signalToDisplay = parsedMessage[0].signal;
       const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
@@ -127,6 +129,7 @@ function checkTime(i) {
         data: parsedMessage[0].closing_price,
         time: time
       });
+      localStorage.setItem('teslaClosingPrice', JSON.stringify(teslaClosingPrice));
       const displaySpan = document.getElementById('lbl_tesla_signal');
       const signalToDisplay = parsedMessage[0].signal;
       const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
@@ -143,6 +146,7 @@ function checkTime(i) {
         data: parsedMessage[0].closing_price,
         time: time
       });
+      localStorage.setItem('appleClosingPrice', JSON.stringify(appleClosingPrice));
       const displaySpan = document.getElementById('lbl_apple_signal');
       signalToDisplay = parsedMessage[0].signal;
       const intervalId = setInterval(updateDisplay(signalToDisplay,displaySpan), 1000);
@@ -373,9 +377,35 @@ googClosingPrice = JSON.parse(localStorage.getItem('googleClosingPrice')) || [];
     googChart.data.datasets[0].data.push(googClosingPrice[i].data);
 }
 googChart.update();
-function pushDataToGoogleChart(){
-  
+
+awsClosingPrice = JSON.parse(localStorage.getItem('amazonClosingPrice')) || [];
+  for (let i = 0; i < awsClosingPrice.length; i++) {
+    awsChart.data.labels.push(awsClosingPrice[i].time);
+    awsChart.data.datasets[0].data.push(awsClosingPrice[i].data);
 }
+awsChart.update();
+
+tslClosingPrice = JSON.parse(localStorage.getItem('teslaClosingPrice')) || [];
+  for (let i = 0; i < tslClosingPrice.length; i++) {
+    tslaChart.data.labels.push(tslClosingPrice[i].time);
+    tslaChart.data.datasets[0].data.push(tslClosingPrice[i].data);
+}
+tslaChart.update();
+
+aplClosingPrice = JSON.parse(localStorage.getItem('appleClosingPrice')) || [];
+  for (let i = 0; i < aplClosingPrice.length; i++) {
+    aplChart.data.labels.push(aplClosingPrice[i].time);
+    aplChart.data.datasets[0].data.push(aplClosingPrice[i].data);
+}
+aplChart.update();
+
+msftClosingPrice = JSON.parse(localStorage.getItem('microsoftClosingPrice')) || [];
+  for (let i = 0; i < msftClosingPrice.length; i++) {
+    msftChart.data.labels.push(msftClosingPrice[i].time);
+    msftChart.data.datasets[0].data.push(msftClosingPrice[i].data);
+}
+msftChart.update();
+
 
 
 function updateGoogleChart() {
@@ -384,7 +414,7 @@ function updateGoogleChart() {
       googChart.data.datasets[0].data.push(googleClosingPrice[googleIndex].data);
       googChart.update();
         googleIndex++;
-        if (googleClosingPrice.length >= 50){
+        if (googleClosingPrice.length >= 30){
           googChart.data.labels.splice(0, 1);
           googChart.data.datasets[0].data.splice(0, 1);
           googChart.update();
@@ -397,7 +427,7 @@ function updateAppleChart() {
     aplChart.data.datasets[0].data.push(appleClosingPrice[appleIndex].data);
     aplChart.update();
       appleIndex++;
-      if (appleClosingPrice.length >= 50){
+      if (appleClosingPrice.length >= 30){
         aplChart.data.labels.splice(0, 1);
         aplChart.data.datasets[0].data.splice(0, 1);
         aplChart.update();
@@ -410,7 +440,7 @@ function updateTeslaChart() {
     tslaChart.data.datasets[0].data.push(teslaClosingPrice[tslaIndex].data);
     tslaChart.update();
       tslaIndex++;
-      if (teslaClosingPrice.length >= 50){
+      if (teslaClosingPrice.length >= 30){
         tslaChart.data.labels.splice(0, 1);
         tslaChart.data.datasets[0].data.splice(0, 1);
         tslaChart.update();
@@ -423,7 +453,7 @@ function updateAmazonChart() {
     awsChart.data.datasets[0].data.push(amazonClosingPrice[awsIndex].data);
     awsChart.update();
       awsIndex++;
-      if (amazonClosingPrice.length >= 50){
+      if (amazonClosingPrice.length >= 30){
         awsChart.data.labels.splice(0, 1);
         awsChart.data.datasets[0].data.splice(0, 1);
         awsChart.update();
@@ -436,7 +466,7 @@ function updateMicrosoftChart() {
     msftChart.data.datasets[0].data.push(microsoftClosingPrice[msftIndex].data);
     msftChart.update();
       msftIndex++;
-      if (microsoftClosingPrice.length >= 50){
+      if (microsoftClosingPrice.length >= 30){
         msftChart.data.labels.splice(0, 1);
         msftChart.data.datasets[0].data.splice(0, 1);
         msftChart.update();
