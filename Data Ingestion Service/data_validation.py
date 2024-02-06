@@ -1,28 +1,4 @@
-from flask import Flask, request
 import json
-from confluent_kafka import Producer
-import threading
-
-app = Flask(__name__)
-
-# Kafka setup
-bootstrap_servers = 'localhost:9092'
-topic = 'financial_data_topic'
-
-# Producer configuration
-producer_config = {
-    'bootstrap.servers': bootstrap_servers,
-    'client.id': 'producer_client'
-}
-
-# Kafka producer
-producer = Producer(producer_config)
-
-def delivery_report(err, msg):
-    if err is not None:
-        print(f'Message delivery failed: {err}')
-    else:
-        print(f'Message delivered to {msg.topic()} [{msg.partition()}] at offset {msg.offset()}')
 
 def validate_timestamp(timestamp):
     # Check if the timestamp is a valid and reasonable value
@@ -80,44 +56,3 @@ def validate_additional_data(data):
 
     if 'sentiment_magnitude' in data and (data['sentiment_magnitude'] < 0 or data['sentiment_magnitude'] > 1):
         raise ValueError("Invalid sentiment_magnitude value")
-
-@app.route('/ingest', methods=['POST'])
-def ingest_data():
-    try:
-        data = json.loads(request.data)
-
-        # Validate timestamp
-        validate_timestamp(data.get('timestamp'))
-
-        # Validate data type
-        validate_data_type(data)
-
-        # Validate stock symbol
-        validate_stock_symbol(data.get('stock_symbol'))
-
-        # Validate numeric values
-        validate_numeric_values(data)
-
-        # Validate consistency checks
-        validate_consistency(data)
-
-        # Validate business rules
-        validate_business_rules(data)
-
-        # Validate additional data
-        validate_additional_data(data)
-
-        # Print the received data
-        print(f'Received data: {data}')
-        print("---------------------------------")
-
-        # Assuming the data is in the expected format, you may need to adjust this
-        producer.produce(topic, key=None, value=json.dumps(data), callback=delivery_report)
-        producer.poll(0)  # Trigger delivery reports
-        threading.Thread(target=producer.flush).start()
-        return {'status': 'success'}
-    except Exception as e:
-        return {'status': 'error', 'message': str(e)}
-
-if __name__ == "__main__":
-    app.run(port=8090)  # Run the Flask app on port 8090
