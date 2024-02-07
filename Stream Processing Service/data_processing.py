@@ -185,10 +185,6 @@ def process_data(message):
         if len(closing_prices_df) >= window_size:
             print(f"Relative Strength Index (RSI):\n{rsi_df[['timestamp', 'stock_symbol', 'rsi']]}")
 
-        
-    
-    
-
         # Update last_processed_timestamp
         last_processed_timestamp = combined_data['timestamp'].max()
         last_processed_timestamp_14 = closing_prices_df['timestamp'].max()
@@ -197,6 +193,11 @@ def process_data(message):
         last_processed_timestamp_ema = ema_df['timestamp'].max()
 
 def send_data_to_kafka(data):
+    # Extract fractional part of the timestamp and store it in a new column
+    #data['timestamp_fraction'] = data['timestamp'].dt.strftime('%f')
+
+    # Keep only the fractional part in the timestamp column
+    data['timestamp'] = data['timestamp'].dt.strftime('%f')
     # Convert DataFrame to JSON string
     json_data = data.to_json(orient='records')
     print(f"sdsdsdsds{json_data}")

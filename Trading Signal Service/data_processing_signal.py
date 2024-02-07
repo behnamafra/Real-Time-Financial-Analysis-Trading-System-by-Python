@@ -27,7 +27,8 @@ def generate_signals(data):
     data.loc[data['closing_price'] > data['moving_average'], 'signal'] = 'Buy'
     data.loc[data['closing_price'] < data['ema'], 'signal'] = 'Sell'
 
-
-
-    print(f"new_data : {data}")
+    # Get the latest data
+    last_row = data.iloc[-1]
+   
+    print(f"new_data : {last_row}")
 
