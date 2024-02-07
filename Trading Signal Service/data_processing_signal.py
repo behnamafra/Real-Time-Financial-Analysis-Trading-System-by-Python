@@ -1,4 +1,6 @@
 import pandas as pd
+from kafka_setup import producer,topic_to_send
+
 
 def generate_signals(data):
 
@@ -29,6 +31,15 @@ def generate_signals(data):
 
     # Get the latest data
     last_row = data.iloc[-1]
-   
+
+    send_data_to_kafka(last_row)
     print(f"new_data : {last_row}")
 
+def send_data_to_kafka(data):
+    # Convert DataFrame to JSON string
+    json_data = data.to_json(orient='records')
+    
+    # Produce the message to the Kafka topic
+    producer.produce(topic_to_send, key=None, value=json_data)
+    print("data sent --------------------------")
+    producer.flush()  # Ensure that all messages are sent

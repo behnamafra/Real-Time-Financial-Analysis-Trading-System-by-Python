@@ -34,7 +34,8 @@ async def start_trading_signal_consumer():
     consumer = Consumer(consumer_config)
 
     # Subscribe to the Kafka topic
-    consumer.subscribe(['analyzed-data'])  # Replace with your Kafka topic
+    consumer.subscribe(['notification'])  # Replace with your Kafka topic
+    print("data receive")
 
     try:
         while True:

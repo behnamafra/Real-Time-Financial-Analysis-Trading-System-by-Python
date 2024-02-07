@@ -2,7 +2,7 @@ from confluent_kafka import Consumer, Producer
 
 # Kafka setup for receive data from producer
 bootstrap_servers = 'localhost:9092'
-topic_to_receive = 'analyzed-data'
+topic_to_receive = 'signal-generat'
 
 # Consumer configuration
 consumer_config = {
@@ -12,7 +12,7 @@ consumer_config = {
 }
 
 # Kafka setup for sending data to the topic
-topic_to_send = 'trading-signal'
+topic_to_send = 'notification'
 
 # Producer configuration
 producer_config = {
